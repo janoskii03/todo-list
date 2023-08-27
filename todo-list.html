@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <div id="app">
+        <div class="container">
+            <h2>代辦清單</h2>
+            <div class="search_area">
+                <input type="text" v-model="searchText">
+                <button @click="resetInputs('searchText')">X</button>
+                <button @click="searchTodo">搜尋</button>
+            </div>
+            <div class="add_area">
+                <input type="date" v-model="addDate" :min="minDate">
+                <input type="search" v-model="addText">
+                <button @click="resetInputs('addText')">X</button>
+                <button @click="addTodo">新增</button>
+            </div>
+            <div class="list_tab">
+                <button :class="{active:currentTab==='all'}" @click="changeTab('all')">全部</button>
+                <button :class="{active:currentTab==='unfinished'}" @click="changeTab('unfinished')">待完成</button>
+                <button :class="{active: currentTab==='finished'}" @click="changeTab('finished')">已完成</button>
+            </div>
+            <p>清單數量：{{listCount}}</p>
+            <button @click="listByDate(true)">日期升序排列</button>
+            <button @click="listByDate(false)">日期降序排列</button>
+            <button @click="cancelList">取消排列</button>
+
+            <div v-for="(item, index) in data" :key="index">
+                <input type="checkbox" v-show="currentTab==='unfinished'" @click="checkToFinished(index,item)">
+                {{item.date}} : {{item.thing}}
+                <button @click="remove(index, item)">X</button>
+            </div>
+
+
+        </div>
+    </div>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script>
+        Vue.createApp({
+            data() {
+                return {
+                    todo: [
+                        {
+                            date: '2023-08-10',
+                            thing: '買衣服',
+                            state: true,
+                        },
+                        {
+                            date: '2023-08-12',
+                            thing: '看電影',
+                            state: true,
+                        },
+                        {
+                            date: '2023-08-18',
+                            thing: '唱歌',
+                            state: true,
+                        },
+                        {
+                            date: '2023-08-28',
+                            thing: '玩桌遊',
+                            state: true,
+                        },
+                        {
+                            date: '2023-07-01',
+                            thing: '和朋友吃飯',
+                            state: false,
+                        },
+                        {
+                            date: '2023-06-02',
+                            thing: '學習英文',
+                            state: false,
+                        },
+                    ],
+                    data: [],
+                    addText: '',
+                    addDate: '',
+                    searchText: '',
+                    currentTab: '全部',
+                    originalData: [],
+                    minDate: new Date().toISOString().split('T')[0], // 最小日期設定為今天
+                    isSorting: false, // 新增一個用來表示是否正在排序的狀態變數
+                }
+            },
+            computed: {
+                listCount() {
+                    return this.data.length;
+                },
+
+            },
+            methods: {
+                changeTab(tabName) {
+                    this.currentTab = tabName;
+                    /*分類消息類別*/
+                    if (tabName === "finished") {
+                        this.data = this.todo.filter(
+                            (message) => message.state === false
+                        )
+                    } else if (tabName === "unfinished") {
+                        this.data = this.todo.filter(
+                            (message) => message.state === true
+                        )
+                    } else {
+                        this.data = this.todo;
+                    }
+                    console.log(this.currentTab);
+                    console.log(this.data);
+                },
+                addTodo() {
+                    if (this.addText === '' || this.addDate === '') {
+                        alert('X')
+                    } else {
+                        const addItem = {
+                            date: this.addDate,
+                            thing: this.addText,
+                            state: true,
+                        }
+                        this.data.push(addItem);
+                        this.resetInputs('addText');
+                    }
+                },
+                listByDate(ascending) {
+                    if (ascending) { // 如果是升序排序
+                        if (!this.isAscendingSorting) {
+
+                            this.data.sort((a, b) => {
+                                return new Date(a.date) - new Date(b.date);
+                            });
+                            this.isAscendingSorting = true;
+                        } else {
+                            this.data.reverse();
+                            this.isAscendingSorting = false;
+                        }
+                        this.isDescendingSorting = false;
+                    } else { // 如果是降序排序
+                        if (!this.isDescendingSorting) {
+
+                            this.data.sort((a, b) => {
+                                return new Date(b.date) - new Date(a.date);
+                            });
+                            this.isDescendingSorting = true;
+                        } else {
+                            this.data.reverse();
+                            this.isDescendingSorting = false;
+                        }
+                        this.isAscendingSorting = false;
+                    }
+                },
+                cancelList() {
+                    if (this.isAscendingSorting || this.isDescendingSorting) {
+                        this.data = [...this.originalData]; 
+                        if (this.currentTab === "finished") {
+                        this.data = this.todo.filter(
+                            (message) => message.state === false
+                        )
+                    } else if (this.currentTab === "unfinished") {
+                        this.data = this.todo.filter(
+                            (message) => message.state === true
+                        )
+                    } else {
+                        this.data;
+                    }
+                    }
+                    this.isAscendingSorting = false;
+                    this.isDescendingSorting = false;
+                },
+                checkToFinished(itemIndex, item) {
+                    item.state = false;
+                    this.data.splice(itemIndex, 1)
+                },
+                resetInputs(inputField) {
+                    this[inputField] = '';
+                },
+                remove(itemIndex, item) {
+                    this.todo.splice(itemIndex, 1);
+                   
+                },
+                searchTodo() {
+
+                },
+
+            },
+            mounted() {
+                this.data = this.todo;
+                this.originalData = [...this.todo]; // 初始化 originalData 數據
+            },
+        }).mount('#app');
+    </script>
+</body>
+
+</html>
+<style>
+    body {
+        margin: 0 auto;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        background-color: #f0f0f0;
+
+
+    }
+
+    .container {
+        width: 100%;
+        max-width: 1200px;
+        height: 100%;
+        height: 500px;
+        padding: 50px;
+        background-color: aqua;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+
+
+    }
+
+    .list_tab {
+        padding: 10px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+
+
+
+    }
+
+    .list_tab button {
+        padding: 10px 20px;
+        background-color: #ffffff;
+    }
+
+    .list_tab .active {
+        background-color: rgb(45, 245, 10);
+    }
+</style>
