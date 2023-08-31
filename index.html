@@ -17,16 +17,16 @@
     <div id="app">
         <div class="container">
             <h2 class="text-center mb-4">代辦清單</h2>
-            <div class="search_area d-flex mb-4 gap-2">
+            <div class="search_area d-flex mb-4 gap-2 align-items-center">
                 <input type="text" v-model.trim="searchText" @input="searchTodo">
                 <button type="button" class="btn-close" aria-label="Close" @click="resetInputs('searchText')"></button>
-                <button @click="searchTodo">搜尋</button>
+                <button type="button" class="btn btn-secondary" @click="searchTodo">搜尋</button>
             </div>
-            <div class="add_area d-flex mb-4 gap-2 ">
+            <div class="add_area d-flex mb-4 gap-2 align-items-center">
                 <input type="date" v-model.trim="addDate" :min="minDate" ref="addDateInput" class="text-center">
                 <input type="search" v-model.trim="addText" @keyup.enter="addTodo">
                 <button type="button" class="btn-close" aria-label="Close" @click="resetInputs('addText')"></button>
-                <button @click="addTodo">新增</button>
+                <button type="button" class="btn btn-secondary" @click="addTodo">新增</button>
             </div>
             <div class="list_tab">
                 <button type="button" class="btn btn-outline-success" :class="{active:currentTab==='all'}"
@@ -52,7 +52,7 @@
                         @click="checkToFinished(index,item)">
                     {{item.date}} : {{item.thing}}
                     <button type="button" class="btn-close" aria-label="Close" @click="remove(index, item)"></button>
-                    <button @click="editItem(item)">編輯</button>
+                    <button type="button" class="btn btn-secondary" @click="editItem(item)">編輯</button>
                 </div>
                 <div v-else>
                     <input type="text" v-model="item.date">
