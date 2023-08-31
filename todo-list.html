@@ -5,7 +5,9 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-/bQdsTh/da6pkI1MST/rWKFNjaCP5gBSY4sEBT38Q/9RBh9AH40zEOg7Hlq2THRZ" crossorigin="anonymous"></script>
+    <title>Todo-list</title>
 </head>
 
 <body>
@@ -13,77 +15,102 @@
         <div class="container">
             <h2>代辦清單</h2>
             <div class="search_area">
-                <input type="text" v-model="searchText">
+                <input type="text" v-model.trim="searchText" @input="searchTodo">
                 <button @click="resetInputs('searchText')">X</button>
                 <button @click="searchTodo">搜尋</button>
             </div>
             <div class="add_area">
-                <input type="date" v-model="addDate" :min="minDate">
-                <input type="search" v-model="addText">
+                <input type="date" v-model.trim="addDate" :min="minDate" ref="addDateInput">
+                <input type="search" v-model.trim="addText" @keyup.enter="addTodo">
                 <button @click="resetInputs('addText')">X</button>
                 <button @click="addTodo">新增</button>
             </div>
             <div class="list_tab">
-                <button :class="{active:currentTab==='all'}" @click="changeTab('all')">全部</button>
-                <button :class="{active:currentTab==='unfinished'}" @click="changeTab('unfinished')">待完成</button>
-                <button :class="{active: currentTab==='finished'}" @click="changeTab('finished')">已完成</button>
+                <button type="button" class="btn btn-outline-success" :class="{active:currentTab==='all'}" @click="changeTab('all')">全部</button>
+                <button type="button" class="btn btn-outline-success" :class="{active:currentTab==='unfinished'}" @click="changeTab('unfinished')">待完成</button>
+                <button type="button" class="btn btn-outline-success" :class="{active: currentTab==='finished'}" @click="changeTab('finished')">已完成</button>
             </div>
             <p>清單數量：{{listCount}}</p>
-            <button @click="listByDate(true)">日期升序排列</button>
-            <button @click="listByDate(false)">日期降序排列</button>
-            <button @click="cancelList">取消排列</button>
-
-            <div v-for="(item, index) in data" :key="index">
-                <input type="checkbox" v-show="currentTab==='unfinished'" @click="checkToFinished(index,item)">
-                {{item.date}} : {{item.thing}}
-                <button @click="remove(index, item)">X</button>
+            <div class="list_date " v-show="data.length>1">
+                <button type="button"  class="btn btn-outline-success" @click="listByDate(true)">日期升序排列</button>
+                <button type="button" class="btn btn-outline-success" @click="listByDate(false)">日期降序排列</button>
+                <button type="button" class="btn btn-outline-success" @click="cancelList">取消排列</button>
             </div>
 
-
+            <div v-for="(item, index) in data" :key="item.id">
+                <div v-show="!item.editing">
+                    <input type="checkbox" v-show="currentTab==='unfinished'" @click="checkToFinished(index,item)">
+                    {{item.date}} : {{item.thing}}
+                    <button @click="remove(index, item)">X</button>
+                    <button @click="editItem(item)">編輯</button>
+                </div>
+                <div v-show="item.editing">
+                    <input type="text" v-model="item.date">
+                    <input type="text" v-model="item.thing">
+                    <button @click="saveItem(item)">儲存</button>
+                    <button @click="cancelEdit(item)">取消</button>
+                </div>
+            </div>
         </div>
+
+
+    </div>
     </div>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script>
         Vue.createApp({
             data() {
                 return {
+                    //state:true代表待完成，false是已完成
                     todo: [
                         {
+                            id: 1,
                             date: '2023-08-10',
                             thing: '買衣服',
                             state: true,
+                            editing: false
                         },
                         {
+                            id: 2,
                             date: '2023-08-12',
                             thing: '看電影',
                             state: true,
+                            editing: false
                         },
                         {
+                            id: 3,
                             date: '2023-08-18',
                             thing: '唱歌',
                             state: true,
+                            editing: false
                         },
                         {
+                            id: 4,
                             date: '2023-08-28',
                             thing: '玩桌遊',
                             state: true,
+                            editing: false
                         },
                         {
+                            id: 5,
                             date: '2023-07-01',
                             thing: '和朋友吃飯',
                             state: false,
+                            editing: false
                         },
                         {
+                            id: 6,
                             date: '2023-06-02',
                             thing: '學習英文',
                             state: false,
+                            editing: false
                         },
                     ],
                     data: [],
                     addText: '',
                     addDate: '',
                     searchText: '',
-                    currentTab: '全部',
+                    currentTab: 'all',
                     originalData: [],
                     minDate: new Date().toISOString().split('T')[0], // 最小日期設定為今天
                     isSorting: false, // 新增一個用來表示是否正在排序的狀態變數
@@ -93,6 +120,7 @@
                 listCount() {
                     return this.data.length;
                 },
+
 
             },
             methods: {
@@ -115,15 +143,21 @@
                 },
                 addTodo() {
                     if (this.addText === '' || this.addDate === '') {
-                        alert('X')
+                        alert('X');
                     } else {
                         const addItem = {
+                            id: this.todo.length + 1,
                             date: this.addDate,
                             thing: this.addText,
                             state: true,
-                        }
+                            editing: false
+                        };
                         this.data.push(addItem);
                         this.resetInputs('addText');
+                        this.originalData.push(addItem);
+
+                        this.addDate = '';
+                        this.$refs.addDateInput.value = '';
                     }
                 },
                 listByDate(ascending) {
@@ -134,10 +168,8 @@
                                 return new Date(a.date) - new Date(b.date);
                             });
                             this.isAscendingSorting = true;
-                        } else {
-                            this.data.reverse();
-                            this.isAscendingSorting = false;
                         }
+
                         this.isDescendingSorting = false;
                     } else { // 如果是降序排序
                         if (!this.isDescendingSorting) {
@@ -146,27 +178,28 @@
                                 return new Date(b.date) - new Date(a.date);
                             });
                             this.isDescendingSorting = true;
-                        } else {
-                            this.data.reverse();
-                            this.isDescendingSorting = false;
                         }
+
                         this.isAscendingSorting = false;
                     }
+
+
                 },
                 cancelList() {
                     if (this.isAscendingSorting || this.isDescendingSorting) {
-                        this.data = [...this.originalData]; 
+                        this.data = [...this.originalData];
                         if (this.currentTab === "finished") {
-                        this.data = this.todo.filter(
-                            (message) => message.state === false
-                        )
-                    } else if (this.currentTab === "unfinished") {
-                        this.data = this.todo.filter(
-                            (message) => message.state === true
-                        )
-                    } else {
-                        this.data;
-                    }
+                            this.data = this.todo.filter(
+                                (message) => message.state === false
+                            )
+                        } else if (this.currentTab === "unfinished") {
+                            this.data = this.todo.filter(
+                                (message) => message.state === true
+                            )
+                        } else {
+                            this.data;
+                        }
+                        console.log(this.isAscendingSorting, this.isDescendingSorting, this.data);
                     }
                     this.isAscendingSorting = false;
                     this.isDescendingSorting = false;
@@ -177,13 +210,82 @@
                 },
                 resetInputs(inputField) {
                     this[inputField] = '';
+                    if (inputField === 'searchText') {
+                        this.data = [...this.originalData];
+
+                    }
+                    if (inputField === 'addText') {
+                        this.addDate = this.addText = '';
+
+                    }
                 },
                 remove(itemIndex, item) {
-                    this.todo.splice(itemIndex, 1);
-                   
+                    this.data.splice(itemIndex, 1);
+                    this.todo = this.todo.filter(todoItem => todoItem.id !== item.id);
+                    this.originalData = this.originalData.filter(todoItem => todoItem.id !== item.id);
+
                 },
                 searchTodo() {
+                    this.data = this.originalData.filter(item => { return item.thing.includes(this.searchText) });
 
+
+                    if (this.searchText === '') {
+                        if (this.isAscendingSorting || this.isDescendingSorting) {
+                            this.data = [...this.originalData];
+                            if (this.currentTab === "finished") {
+                                this.data = this.todo.filter(
+                                    (message) => message.state === false
+                                )
+                            } else if (this.currentTab === "unfinished") {
+                                this.data = this.todo.filter(
+                                    (message) => message.state === true
+                                )
+                            } else {
+                                this.data;
+                            }
+
+
+                        }
+                        this.isAscendingSorting = false;
+                        this.isDescendingSorting = false;
+                        this.searchText = ''; 
+                    }
+                },
+                editItem(item) {
+                      // 在編輯進入之前，創建原始副本
+            item.originalCopy = {
+                date: item.date,
+                thing: item.thing,
+                state: item.state
+            };
+            item.editing = true;
+                },
+
+                saveItem(item) {
+                    
+                    if (item.thing && item.date) {
+                        item.editing = false;
+                        item.originalCopy = null; // 保存後，刪除原始副本
+                    } else {
+                        alert('請輸入日期或內容');
+                        console.log(item);
+
+                    }
+                   
+                },
+
+                cancelEdit(item) {
+                    if (item.editing) {
+                if (item.originalCopy) {
+                    // 恢復到原始副本的內容
+                    item.date = item.originalCopy.date;
+                    item.thing = item.originalCopy.thing;
+                    item.state = item.originalCopy.state;
+                    item.originalCopy = null; // 取消編輯後，刪除原始副本
+                }
+                item.editing = false;
+            }
+        
                 },
 
             },
@@ -197,6 +299,7 @@
 
 </html>
 <style>
+    
     body {
         margin: 0 auto;
         display: flex;
@@ -210,17 +313,26 @@
 
     .container {
         width: 100%;
-        max-width: 1200px;
+        min-width: 600px;
         height: 100%;
-        height: 500px;
+        min-height: 700px;
         padding: 50px;
-        background-color: aqua;
+        background-color: rgb(188, 214, 214);
         border-radius: 10px;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 
 
 
     }
+    .list_date{
+        margin: 20px auto;
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+
+    }
+
+  
 
     .list_tab {
         padding: 10px;
@@ -228,17 +340,9 @@
         display: flex;
         justify-content: center;
         gap: 15px;
-
-
-
-    }
-
-    .list_tab button {
-        padding: 10px 20px;
-        background-color: #ffffff;
     }
 
     .list_tab .active {
-        background-color: rgb(45, 245, 10);
+        background-color: rgb(61, 118, 52);
     }
 </style>
