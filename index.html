@@ -5,8 +5,11 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU" crossorigin="anonymous">
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-/bQdsTh/da6pkI1MST/rWKFNjaCP5gBSY4sEBT38Q/9RBh9AH40zEOg7Hlq2THRZ" crossorigin="anonymous"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-/bQdsTh/da6pkI1MST/rWKFNjaCP5gBSY4sEBT38Q/9RBh9AH40zEOg7Hlq2THRZ"
+        crossorigin="anonymous"></script>
     <title>Todo-list</title>
 </head>
 
@@ -26,20 +29,27 @@
                 <button @click="addTodo">新增</button>
             </div>
             <div class="list_tab">
-                <button type="button" class="btn btn-outline-success" :class="{active:currentTab==='all'}" @click="changeTab('all')">全部</button>
-                <button type="button" class="btn btn-outline-success" :class="{active:currentTab==='unfinished'}" @click="changeTab('unfinished')">待完成</button>
-                <button type="button" class="btn btn-outline-success" :class="{active: currentTab==='finished'}" @click="changeTab('finished')">已完成</button>
+                <button type="button" class="btn btn-outline-success" :class="{active:currentTab==='all'}"
+                    @click="changeTab('all')">全部</button>
+                <button type="button" class="btn btn-outline-success" :class="{active:currentTab==='unfinished'}"
+                    @click="changeTab('unfinished')">待完成</button>
+                <button type="button" class="btn btn-outline-success" :class="{active: currentTab==='finished'}"
+                    @click="changeTab('finished')">已完成</button>
             </div>
             <p>清單數量：{{listCount}} 筆</p>
             <div class="list_date " v-show="data.length>1">
-                <button type="button"  class="btn btn-outline-success" :class="{active:currentList==='ascending'}" @click="listByDate(true)">日期升序排列</button>
-                <button type="button" class="btn btn-outline-success" :class="{active:currentList==='descending'}" @click="listByDate(false)">日期降序排列</button>
-                <button type="button" class="btn btn-outline-success" :class="{active:currentList==='cancel'}" @click="cancelList">取消排列</button>
+                <button type="button" class="btn btn-outline-success" :class="{active:currentList==='ascending'}"
+                    @click="listByDate(true)">日期升序排列</button>
+                <button type="button" class="btn btn-outline-success" :class="{active:currentList==='descending'}"
+                    @click="listByDate(false)">日期降序排列</button>
+                <button type="button" class="btn btn-outline-success" :class="{active:currentList==='cancel'}"
+                    @click="cancelList">取消排列</button>
             </div>
 
             <div v-for="(item, index) in data" :key="item.id">
                 <div v-if="!item.editing" class="d-flex gap-2  mb-3 align-items-center ms-5">
-                    <input type="checkbox" class="unfinished_check" v-show="currentTab==='unfinished'" @click="checkToFinished(index,item)">
+                    <input type="checkbox" class="unfinished_check" v-show="currentTab==='unfinished'"
+                        @click="checkToFinished(index,item)">
                     {{item.date}} : {{item.thing}}
                     <button type="button" class="btn-close" aria-label="Close" @click="remove(index, item)"></button>
                     <button @click="editItem(item)">編輯</button>
@@ -112,7 +122,7 @@
                     searchText: '',
                     currentTab: 'all',
                     originalData: [],
-                    currentList:'',
+                    currentList: '',
                     minDate: new Date().toISOString().split('T')[0], // 最小日期設定為今天
                     isSorting: false, // 新增一個用來表示是否正在排序的狀態變數
                 }
@@ -163,33 +173,24 @@
                 },
                 listByDate(ascending) {
                     if (ascending) { // 如果是升序排序
-                        if (!this.isAscendingSorting) {
-
-                            this.data.sort((a, b) => {
-                                return new Date(a.date) - new Date(b.date);
-                            });
-                            this.isAscendingSorting = true;
-                            this.currentList='ascending';
-                        }
-
-                        this.isDescendingSorting = false;
+                        this.data.sort((a, b) => {
+                            return new Date(a.date) - new Date(b.date);
+                        });
+                        
+                        this.currentList = 'ascending';
+                       
                     } else { // 如果是降序排序
-                        if (!this.isDescendingSorting) {
-
-                            this.data.sort((a, b) => {
-                                return new Date(b.date) - new Date(a.date);
-                            });
-                            this.isDescendingSorting = true;
-                            this.currentList='descending';
-                        }
-
-                        this.isAscendingSorting = false;
+                        this.data.sort((a, b) => {
+                            return new Date(b.date) - new Date(a.date);
+                        });
+                       
+                        this.currentList = 'descending';
+                       
                     }
 
 
                 },
                 cancelList() {
-                    if (this.isAscendingSorting || this.isDescendingSorting) {
                         this.data = [...this.originalData];
                         if (this.currentTab === "finished") {
                             this.data = this.todo.filter(
@@ -201,12 +202,9 @@
                             )
                         } else {
                             this.data;
-                        }
-                        console.log(this.isAscendingSorting, this.isDescendingSorting, this.data);
-                    }
-                    this.currentList='cancel';
-                    this.isAscendingSorting = false;
-                    this.isDescendingSorting = false;
+                        }                   
+                    this.currentList = 'cancel';
+                   
                 },
                 checkToFinished(itemIndex, item) {
                     item.state = false;
@@ -216,11 +214,9 @@
                     this[inputField] = '';
                     if (inputField === 'searchText') {
                         this.data = [...this.originalData];
-
                     }
                     if (inputField === 'addText') {
                         this.addDate = this.addText = '';
-
                     }
                 },
                 remove(itemIndex, item) {
@@ -231,10 +227,7 @@
                 },
                 searchTodo() {
                     this.data = this.originalData.filter(item => { return item.thing.includes(this.searchText) });
-
-
-                    if (this.searchText === '') {
-                        if (this.isAscendingSorting || this.isDescendingSorting) {
+                    if (this.searchText === '') {                      
                             this.data = [...this.originalData];
                             if (this.currentTab === "finished") {
                                 this.data = this.todo.filter(
@@ -246,27 +239,22 @@
                                 )
                             } else {
                                 this.data;
-                            }
-
-
-                        }
-                        this.isAscendingSorting = false;
-                        this.isDescendingSorting = false;
-                        this.searchText = ''; 
+                            }                    
+                        this.searchText = '';
                     }
                 },
                 editItem(item) {
-                      // 在編輯進入之前，創建原始副本
-            item.originalCopy = {
-                date: item.date,
-                thing: item.thing,
-                state: item.state
-            };
-            item.editing = true;
+                    // 在編輯進入之前，創建原始副本
+                    item.originalCopy = {
+                        date: item.date,
+                        thing: item.thing,
+                        state: item.state
+                    };
+                    item.editing = true;
                 },
 
                 saveItem(item) {
-                    
+
                     if (item.thing && item.date) {
                         item.editing = false;
                         item.originalCopy = null; // 保存後，刪除原始副本
@@ -275,21 +263,21 @@
                         console.log(item);
 
                     }
-                   
+
                 },
 
                 cancelEdit(item) {
                     if (item.editing) {
-                if (item.originalCopy) {
-                    // 恢復到原始副本的內容
-                    item.date = item.originalCopy.date;
-                    item.thing = item.originalCopy.thing;
-                    item.state = item.originalCopy.state;
-                    item.originalCopy = null; // 取消編輯後，刪除原始副本
-                }
-                item.editing = false;
-            }
-        
+                        if (item.originalCopy) {
+                            // 恢復到原始副本的內容
+                            item.date = item.originalCopy.date;
+                            item.thing = item.originalCopy.thing;
+                            item.state = item.originalCopy.state;
+                            item.originalCopy = null; // 取消編輯後，刪除原始副本
+                        }
+                        item.editing = false;
+                    }
+
                 },
 
             },
@@ -303,7 +291,6 @@
 
 </html>
 <style>
-    
     body {
         margin: 0 auto;
         display: flex;
@@ -328,7 +315,8 @@
 
 
     }
-    .list_date{
+
+    .list_date {
         margin: 20px auto;
         display: flex;
         justify-content: center;
@@ -339,7 +327,7 @@
     .list_date .active {
         background-color: rgb(61, 118, 52);
     }
-  
+
 
     .list_tab {
         padding: 10px;
@@ -353,7 +341,7 @@
         background-color: rgb(61, 118, 52);
     }
 
-    .unfinished_check{
-        transform: scale(1.5);  
+    .unfinished_check {
+        transform: scale(1.5);
     }
 </style>
