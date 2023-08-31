@@ -18,13 +18,13 @@
         <div class="container">
             <h2 class="text-center mb-4">代辦清單</h2>
             <div class="search_area d-flex mb-4 gap-2 align-items-center">
-                <input type="text" v-model.trim="searchText" @input="searchTodo">
+                <input type="text" v-model.trim="searchText" @input="searchTodo" class="rounded-2 border border-success">
                 <button type="button" class="btn-close" aria-label="Close" @click="resetInputs('searchText')"></button>
                 <button type="button" class="btn btn-secondary" @click="searchTodo">搜尋</button>
             </div>
             <div class="add_area d-flex mb-4 gap-2 align-items-center">
-                <input type="date" v-model.trim="addDate" :min="minDate" ref="addDateInput" class="text-center">
-                <input type="search" v-model.trim="addText" @keyup.enter="addTodo">
+                <input type="date" v-model.trim="addDate" :min="minDate" ref="addDateInput" class="text-center rounded-2 border border-success">
+                <input type="search" v-model.trim="addText" @keyup.enter="addTodo" class="rounded-2 border border-success" >
                 <button type="button" class="btn-close" aria-label="Close" @click="resetInputs('addText')"></button>
                 <button type="button" class="btn btn-secondary" @click="addTodo">新增</button>
             </div>
